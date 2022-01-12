@@ -5,6 +5,9 @@
 import 'package:fit_wheel/workout.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+
 import 'lists.dart';
 
 void main() {
@@ -26,7 +29,7 @@ class _MyAppState extends State<MyApp> {
   // though
   final _formKey = GlobalKey<FormState>();
 
-
+  final service = WorkoutService();
   var workouts = <Workout>[];
   var myController = TextEditingController();
 
@@ -42,7 +45,8 @@ class _MyAppState extends State<MyApp> {
     Workout? workout = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => EditList(workout: workouts[index]),
+          builder: (context) => EditList(
+            workout: workouts[index], service: service,),
         ));
     if (workout != null) {
       setState(() {
@@ -163,14 +167,12 @@ class _MyAppState extends State<MyApp> {
                   Workout? workout = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const WorkoutList(),
+                      builder: (context) => WorkoutList(service: service,),
                     ),
                   );
-                  if (workout != null) {
-                    setState(() {
-                      workouts.add(workout);
+                  setState(() {
+                      workouts.add(workout!);
                     });
-                  }
                 },
               ),
             )
