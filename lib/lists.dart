@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 Column getNewColumn(TextEditingController controller, String fieldName) {
   return Column(
     children: <Widget>[
-      const Text('New Exercise'),
+      const Text('New Workout Name'),
       TextField(
           controller: controller,
           decoration: InputDecoration(labelText: fieldName)),
@@ -45,7 +45,22 @@ class _State<T extends StatefulWidget> extends State<T> {
   var textFields = <Card>[];
   var myController = <TextEditingController>[];
 
-  _onDone() {}
+  _onDone() {
+    if (myController.isEmpty) {
+      return;
+    }
+    var vehicleName = myController[0].text;
+    if (myController.length == 1) {
+      Navigator.pop(context, Workout(vehicleName, [], Icons.add));
+      return;
+    }
+    List<String> vehicleNames = <String>[];
+    for (int i = 1; i < textFields.length; i++) {
+      var name = myController[i].text;
+      vehicleNames.add(name);
+    }
+    Navigator.pop(context, Workout(vehicleName, vehicleNames, Icons.add));
+  }
 
   Card createCard(String fieldName, {bool newCard = false}) {
     var controller = TextEditingController();
@@ -116,50 +131,13 @@ class _ELState extends _State<EditList> {
           : getItemColumn(controller, fieldName),
     );
   }
-
-  @override
-  _onDone() {
-    if (myController.isEmpty) {
-      return;
-    }
-    var vehicleName = myController[0].text;
-    if (myController.length == 1) {
-      Navigator.pop(context, Workout(vehicleName, [], Icons.add));
-      return;
-    }
-    List<String> vehicleNames = <String>[];
-    for (int i = 1; i < textFields.length; i++) {
-      var name = myController[i].text;
-      vehicleNames.add(name);
-    }
-    Navigator.pop(context, Workout(vehicleName, vehicleNames, Icons.add));
-  }
 }
 
 class _WLState extends _State<WorkoutList> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textFields.add(createCard('New Exercise Type', newCard: true));
-  }
-
-  @override
-  _onDone() {
-    if (myController.isEmpty) {
-      return;
-    }
-    var vehicleName = myController[0].text;
-    if (myController.length == 1) {
-      Navigator.pop(context, Workout(vehicleName, [], Icons.add));
-      return;
-    }
-    List<String> vehicleNames = <String>[];
-    for (int i = 1; i < textFields.length; i++) {
-      var name = myController[i].text;
-      vehicleNames.add(name);
-    }
-    Navigator.pop(context, Workout(vehicleName, vehicleNames, Icons.add));
   }
 }

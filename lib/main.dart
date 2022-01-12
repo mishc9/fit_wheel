@@ -22,8 +22,97 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // Todo: find out how does the GlobalKey work. I don't really need it here,
+  // though
+  final _formKey = GlobalKey<FormState>();
+
+
   var workouts = <Workout>[];
   var myController = TextEditingController();
+
+  Widget getTextButton(String buttonText, int index, Function(int) callback) {
+    return TextButton(
+        child: Text(buttonText),
+        onPressed: () async {
+          callback(index);
+        });
+  }
+
+  updateWorkout(index) async {
+    Workout? workout = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditList(workout: workouts[index]),
+        ));
+    if (workout != null) {
+      setState(() {
+        workouts[index] = workout;
+      });
+    }
+  }
+
+  deleteWorkout(index) async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Stack(
+              overflow: Overflow.visible,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkResponse(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const CircleAvatar(
+                      child: Icon(Icons.close),
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+                ),
+                Form(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                            "Deleting workout ${workouts[index].title}. "
+                            "Are you sure?"
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          child: const Text("Cancel"),
+                          onPressed: () {
+                              // Snap back;
+                              Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          child: const Text("Delete"),
+                          onPressed: () {
+                            setState(() {
+                              workouts.removeAt(index);
+                            });
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,40 +141,11 @@ class _MyAppState extends State<MyApp> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          TextButton(
-                            child: const Text('Edit list'),
-                            onPressed: () async {
-                              Workout? vehicle = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      EditList(workout: workouts[index]),
-                                ),
-                              );
-                              if (vehicle != null) {
-                                setState(() {
-                                  workouts[index] = vehicle;
-                                });
-                              }
-                            },
-                          ),
+                          getTextButton('Edit list', index, updateWorkout),
                           const SizedBox(width: 8),
-                          TextButton(
-                            child: const Text('Run'),
-                            onPressed: () async {
-                              Workout? workout = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditList(workout: workouts[index]),
-                                  ));
-                              if (workout != null) {
-                                setState(() {
-                                  workouts[index] = workout;
-                                });
-                              }
-                            },
-                          ),
+                          getTextButton('Run', index, updateWorkout),
+                          const SizedBox(width: 8),
+                          getTextButton('Delete', index, deleteWorkout),
                           const SizedBox(width: 8),
                         ],
                       ),
@@ -174,5 +234,59 @@ class _MyAppState extends State<MyApp> {
       ));
     }
     return columnContent;
+  }
+
+  _deleteWorkout(index) async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Stack(
+              overflow: Overflow.visible,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkResponse(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const CircleAvatar(
+                      child: Icon(Icons.close),
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          child: const Text("Submitß"),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+                            }
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 }
