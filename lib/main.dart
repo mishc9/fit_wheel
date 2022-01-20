@@ -1,10 +1,8 @@
 import 'package:fit_wheel/planner/suggestor.dart';
-import 'package:fit_wheel/planner/updater.dart';
-import 'package:fit_wheel/planner/planner.dart';
 import 'package:fit_wheel/workout.dart';
 import 'package:flutter/material.dart';
 
-import 'planner/planner.dart';
+import 'main/mainPage.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -38,58 +36,9 @@ class _MyAppState extends State<MyApp> {
             style: TextStyle(fontSize: 16),
           ),
         ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-                child: ListView.builder(
-              itemCount: workouts.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      ListTile(
-                        leading: const Icon(Icons.task),
-                        title: Text(workouts[index].title),
-                        subtitle: Text(workouts[index].contents.toString()),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          getTextButton('Edit list', index, editWorkout),
-                          const SizedBox(width: 8),
-                          getTextButton('Run', index, editWorkout),
-                          const SizedBox(width: 8),
-                          getTextButton('Delete', index, deleteWorkout),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-                // Text(vehicles[index].toString());
-              },
-            )),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                child: const Text('Add Workout'),
-                onPressed: () async {
-                  Workout? workout = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WorkoutPlanner(
-                        suggestor: suggestor,
-                      ),
-                    ),
-                  );
-                  setState(() {
-                    workouts.add(workout!);
-                  });
-                },
-              ),
-            )
-          ],
+        body: MainPage(
+          workouts: workouts,
+          suggestor: suggestor,
         ));
   }
 
@@ -101,7 +50,6 @@ class _MyAppState extends State<MyApp> {
             controller: myController,
           )
         ];
-
         return Scaffold(
           appBar: AppBar(
             title:
@@ -149,91 +97,5 @@ class _MyAppState extends State<MyApp> {
       ));
     }
     return columnContent;
-  }
-
-  Widget getTextButton(String buttonText, int index, Function(int) callback) {
-    return TextButton(
-        child: Text(buttonText),
-        onPressed: () async {
-          callback(index);
-        });
-  }
-
-  editWorkout(index) async {
-    Workout? workout = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WorkoutUpdater(
-            workout: workouts[index],
-            suggestor: suggestor,
-          ),
-        ));
-    if (workout != null) {
-      setState(() {
-        workouts[index] = workout;
-      });
-    }
-  }
-
-  deleteWorkout(index) async {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Stack(
-              overflow: Overflow.visible,
-              children: <Widget>[
-                Positioned(
-                  right: -40.0,
-                  top: -40.0,
-                  child: InkResponse(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const CircleAvatar(
-                      child: Icon(Icons.close),
-                      backgroundColor: Colors.red,
-                    ),
-                  ),
-                ),
-                Form(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child:
-                            Text("Deleting workout ${workouts[index].title}. "
-                                "Are you sure?"),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          child: const Text("Cancel"),
-                          onPressed: () {
-                            // Snap back;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          child: const Text("Delete"),
-                          onPressed: () {
-                            setState(() {
-                              workouts.removeAt(index);
-                            });
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
   }
 }

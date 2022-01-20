@@ -1,5 +1,4 @@
 import 'package:fit_wheel/planner/suggestor.dart';
-import 'package:fit_wheel/workout.dart';
 import 'package:flutter/material.dart';
 
 import 'abc.dart';
