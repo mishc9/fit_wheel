@@ -5,9 +5,14 @@ class ExerciseDeleter extends StatefulWidget {
   // Todo: is providing index really worth it, or there exist a better way?
   final List<Workout> workouts;
   final int index;
+  final Function() notifyParent;
 
-  ExerciseDeleter({Key? key, required this.workouts, required this.index})
-      : super(key: key);
+  ExerciseDeleter({
+    Key? key,
+    required this.workouts,
+    required this.index,
+    required this.notifyParent,
+  }) : super(key: key);
 
   @override
   ExerciseDeleterState createState() => ExerciseDeleterState();
@@ -61,6 +66,7 @@ class ExerciseDeleterState extends State<ExerciseDeleter> {
                     onPressed: () {
                       setState(() {
                         widget.workouts.removeAt(widget.index);
+                        widget.notifyParent();
                       });
                       Navigator.of(context).pop();
                     },

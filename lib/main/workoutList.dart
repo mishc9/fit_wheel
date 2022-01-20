@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fit_wheel/main/workoutRepr.dart';
 import 'package:fit_wheel/planner/suggestor.dart';
 import 'package:fit_wheel/workout.dart';
@@ -6,12 +8,14 @@ import 'package:flutter/material.dart';
 class WorkoutListView extends StatefulWidget {
   final List<Workout> workouts;
   final WorkoutSuggestor suggestor;
+  final Function() notifyParent;
 
-  WorkoutListView({
-    Key? key,
-    required this.workouts,
-    required this.suggestor,
-  }) : super(key: key);
+  WorkoutListView(
+      {Key? key,
+      required this.workouts,
+      required this.suggestor,
+      required this.notifyParent})
+      : super(key: key);
 
   @override
   WorkoutListViewState createState() => WorkoutListViewState();
@@ -37,7 +41,8 @@ class WorkoutListViewState extends State<WorkoutListView> {
               WorkoutReprWidget(
                   workouts: widget.workouts,
                   suggestor: widget.suggestor,
-                  index: index),
+                  index: index,
+                  notifyParent: widget.notifyParent),
             ],
           ),
         );

@@ -3,16 +3,17 @@ import 'package:fit_wheel/planner/suggestor.dart';
 import 'package:fit_wheel/workout.dart';
 import 'package:flutter/material.dart';
 
-
 class AddWorkout extends StatefulWidget {
   final List<Workout> workouts;
   final WorkoutSuggestor suggestor;
+  final Function() notifyParent;
 
-  AddWorkout({
-    Key? key,
-    required this.workouts,
-    required this.suggestor,
-  }) : super(key: key);
+  AddWorkout(
+      {Key? key,
+      required this.workouts,
+      required this.suggestor,
+      required this.notifyParent})
+      : super(key: key);
 
   @override
   AddWorkoutState createState() => AddWorkoutState();
@@ -36,6 +37,7 @@ class AddWorkoutState extends State<AddWorkout> {
           );
           setState(() {
             widget.workouts.add(workout!);
+            widget.notifyParent();
           });
         },
       ),

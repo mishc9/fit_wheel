@@ -22,9 +22,20 @@ class MainPageState extends State<MainPage> {
     // TODO: implement build
     return Column(
       children: <Widget>[
-        WorkoutListView(workouts: widget.workouts, suggestor: widget.suggestor),
-        AddWorkout(workouts: widget.workouts, suggestor: widget.suggestor),
+        WorkoutListView(
+          workouts: widget.workouts,
+          suggestor: widget.suggestor,
+          notifyParent: refresh,
+        ),
+        AddWorkout(
+            workouts: widget.workouts,
+            suggestor: widget.suggestor,
+            notifyParent: refresh),
       ],
     );
+  }
+
+  refresh() {
+    setState(() {});
   }
 }

@@ -9,12 +9,14 @@ class WorkoutReprWidget extends StatefulWidget {
   final List<Workout> workouts;
   final WorkoutSuggestor suggestor;
   final int index;
+  final Function() notifyParent;
 
   WorkoutReprWidget(
       {Key? key,
       required this.workouts,
       required this.suggestor,
-      required this.index})
+      required this.index,
+      required this.notifyParent})
       : super(key: key);
 
   @override
@@ -57,6 +59,7 @@ class WorkoutReprWidgetState extends State<WorkoutReprWidget> {
     if (workout != null) {
       setState(() {
         widget.workouts[widget.index] = workout;
+        widget.notifyParent();
       });
     }
   }
@@ -66,7 +69,10 @@ class WorkoutReprWidgetState extends State<WorkoutReprWidget> {
         context: context,
         builder: (BuildContext context) {
           return ExerciseDeleter(
-              workouts: widget.workouts, index: widget.index);
+            workouts: widget.workouts,
+            index: widget.index,
+            notifyParent: widget.notifyParent,
+          );
         });
   }
 }
