@@ -1,14 +1,10 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+import 'package:fit_wheel/planner/suggestor.dart';
+import 'package:fit_wheel/planner/updater.dart';
+import 'package:fit_wheel/planner/planner.dart';
 import 'package:fit_wheel/workout.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_typeahead/flutter_typeahead.dart';
-
-
-import 'lists.dart';
+import 'planner/planner.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -29,94 +25,9 @@ class _MyAppState extends State<MyApp> {
   // though
   final _formKey = GlobalKey<FormState>();
 
-  final service = WorkoutService();
+  final suggestor = WorkoutSuggestor();
   var workouts = <Workout>[];
   var myController = TextEditingController();
-
-  Widget getTextButton(String buttonText, int index, Function(int) callback) {
-    return TextButton(
-        child: Text(buttonText),
-        onPressed: () async {
-          callback(index);
-        });
-  }
-
-  updateWorkout(index) async {
-    Workout? workout = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EditList(
-            workout: workouts[index], service: service,),
-        ));
-    if (workout != null) {
-      setState(() {
-        workouts[index] = workout;
-      });
-    }
-  }
-
-  deleteWorkout(index) async {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Stack(
-              overflow: Overflow.visible,
-              children: <Widget>[
-                Positioned(
-                  right: -40.0,
-                  top: -40.0,
-                  child: InkResponse(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const CircleAvatar(
-                      child: Icon(Icons.close),
-                      backgroundColor: Colors.red,
-                    ),
-                  ),
-                ),
-                Form(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                            "Deleting workout ${workouts[index].title}. "
-                            "Are you sure?"
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          child: const Text("Cancel"),
-                          onPressed: () {
-                              // Snap back;
-                              Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          child: const Text("Delete"),
-                          onPressed: () {
-                            setState(() {
-                              workouts.removeAt(index);
-                            });
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +56,9 @@ class _MyAppState extends State<MyApp> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          getTextButton('Edit list', index, updateWorkout),
+                          getTextButton('Edit list', index, editWorkout),
                           const SizedBox(width: 8),
-                          getTextButton('Run', index, updateWorkout),
+                          getTextButton('Run', index, editWorkout),
                           const SizedBox(width: 8),
                           getTextButton('Delete', index, deleteWorkout),
                           const SizedBox(width: 8),
@@ -167,12 +78,14 @@ class _MyAppState extends State<MyApp> {
                   Workout? workout = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => WorkoutList(service: service,),
+                      builder: (context) => WorkoutPlanner(
+                        suggestor: suggestor,
+                      ),
                     ),
                   );
                   setState(() {
-                      workouts.add(workout!);
-                    });
+                    workouts.add(workout!);
+                  });
                 },
               ),
             )
@@ -238,7 +151,31 @@ class _MyAppState extends State<MyApp> {
     return columnContent;
   }
 
-  _deleteWorkout(index) async {
+  Widget getTextButton(String buttonText, int index, Function(int) callback) {
+    return TextButton(
+        child: Text(buttonText),
+        onPressed: () async {
+          callback(index);
+        });
+  }
+
+  editWorkout(index) async {
+    Workout? workout = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WorkoutUpdater(
+            workout: workouts[index],
+            suggestor: suggestor,
+          ),
+        ));
+    if (workout != null) {
+      setState(() {
+        workouts[index] = workout;
+      });
+    }
+  }
+
+  deleteWorkout(index) async {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -260,26 +197,34 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 Form(
-                  key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(),
+                        child:
+                            Text("Deleting workout ${workouts[index].title}. "
+                                "Are you sure?"),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: RaisedButton(
-                          child: const Text("Submitß"),
+                        child: ElevatedButton(
+                          child: const Text("Cancel"),
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-                            }
+                            // Snap back;
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          child: const Text("Delete"),
+                          onPressed: () {
+                            setState(() {
+                              workouts.removeAt(index);
+                            });
+                            Navigator.of(context).pop();
                           },
                         ),
                       )
